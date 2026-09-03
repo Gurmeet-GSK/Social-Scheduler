@@ -14,7 +14,12 @@ const generateToken = (id: string): string => {
 // POST /api/auth/register
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body ?? {};
+
+    if (!name || !email || !password) {
+      res.status(400).json({ message: "Name, email, and password are required" });
+      return;
+    }
 
     const userExist = await User.findOne({ email });
     if (userExist) {
@@ -48,7 +53,12 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 // POST /api/auth/login
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body ?? {};
+
+    if (!email || !password) {
+      res.status(400).json({ message: "Email and password are required" });
+      return;
+    }
 
     const user = await User.findOne({ email });
 
