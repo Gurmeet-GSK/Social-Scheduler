@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react"
-import { dummyPostsData, PLATFORMS } from "../assets/assets";
+import {  PLATFORMS } from "../assets/assets";
 import { ArrowRightIcon, CalendarDaysIcon, SendIcon, XIcon } from "lucide-react";
 import DateTimePicker from "../components/DateTimePicker"
 import SuccessToast from "../components/SuccessToast"
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 
 const Scheduler = () => {
@@ -12,20 +14,25 @@ const Scheduler = () => {
   const [scheduledTime, setScheduledTime] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<any[]>([]);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  
 
   // Success Toast State
   const [showSuccess, setShowSuccess] = useState(false);
   const [confirmedDate, setConfirmedDate] = useState("");
   const [confirmedTime, setConfirmedTime] = useState("");
 
-  const fetctPosts = async () => {
-    setPosts(dummyPostsData)
+  const fetchPosts = async () => {
+    try {
+      const { data } = await api.get("/api/posts")
+      setPosts(data)
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+    }
   }
 
   useEffect(() => {
-    (async () => await fetctPosts())();
-    const interval = setInterval(async () => await fetctPosts(), 1000);
+    (async () => await fetchPosts())();
+    const interval = setInterval(async () => await fetchPosts(), 10000);
     return () => clearInterval(interval)
   }, [])
 
@@ -37,21 +44,43 @@ const Scheduler = () => {
 
   const handleSchedule = async (e: React.FormEvent) => {
     e.preventDefault()
+    if(selectedPlatforms.length === 0){
+      toast.error("Select at least one platform");
+      return;
+    }
+    if(!scheduledDate || !scheduledTime){
+      toast.error("Select data & time");
+      return;
+    }
+    if(selectedPlatforms.includes(`instagram`) && !mediaFile){
+      toast.error("Instagram requires an image or video");
+      return;
+    }
+
+    const scheduledFor = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+    const formData = new FormData();
+    formData.append("content", content);
+    formData.append("scheduledFor", scheduledFor);
+    formData.append("status", "scheduled");
+    formData.append("platforms", JSON.stringify(selectedPlatforms));
+    if(mediaFile) formData.append("media", mediaFile);
+
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      setPosts((prev) => [...prev, dummyPostsData[0]])
-      // Snapshot the date/time before clearing the form
-      setConfirmedDate(scheduledDate)
-      setConfirmedTime(scheduledTime)
-      setShowSuccess(true)
-      // Reset the form for the next post
-      setContent("")
-      setSelectedPlatforms([])
-      setScheduledDate("")
-      setScheduledTime("")
-      setMediaFile(null)
-    }, 1000)
+    try {
+      await api.post("/api/posts", formData, {headers: {"Content-Type": "multipart/form-data"}})
+      toast.success("Post scheduled!");
+      setContent("");
+
+      setScheduledDate("");
+      setScheduledTime("");
+      setSelectedPlatforms([]);
+      setMediaFile(null);
+      fetchPosts();
+    } catch (error:any) {
+      toast.error(error?.response?.data?.message || error.message);
+    }finally{
+      setLoading(false);
+    }
   }
 
   return (
