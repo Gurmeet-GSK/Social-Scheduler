@@ -39,7 +39,7 @@ export const disconnectAccount = async (req: AuthRequest, res: Response) : Promi
             res.status(404).json({ message: "Account not found"});
             return;
         }
-        if(account.zernioAccountId){
+        if(typeof account.zernioAccountId === "string" && account.zernioAccountId.startsWith("acc_")){
             try{
                 await zernio.accounts.deleteAccount({path: {accountId: account.zernioAccountId}})
             } catch(error:any){

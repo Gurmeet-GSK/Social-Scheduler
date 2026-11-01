@@ -92,7 +92,7 @@ export const syncAccounts = async (req: AuthRequest, res: Response): Promise<voi
         const syncedAccounts = [];
 
         for (const zAccount of zernioAccounts) {
-            const zid = zAccount._id || zAccount.id;
+            const zid = zAccount.id || zAccount._id;
             if (!zid) {
                 console.warn("Skipping account with no ID:", zAccount);
                 continue;
