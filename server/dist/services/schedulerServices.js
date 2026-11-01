@@ -10,7 +10,7 @@ export const initScheduler = () => {
             const postsToPublish = await Post.find({ status: "scheduled", scheduledFor: { $lte: now } });
             for (const post of postsToPublish) {
                 try {
-                    const validPlatforms = post.platform.filter((p) => ["twitter", "linkedin", "facebook", "instagram", "facebook_page", "instagram_business"].includes(p));
+                    const validPlatforms = post.platforms.filter((p) => ["twitter", "facebook", "linkedin", "instagram", "facebook_page", "linkedin_page", "instagram_page"].includes(p));
                     const accounts = await Account.find({
                         user: post.user,
                         platform: { $in: validPlatforms },
@@ -42,6 +42,7 @@ export const initScheduler = () => {
                     }
                     console.log(`Zernio post created: ${publishedPost._id || publishedPost.id}`);
                     post.status = "published";
+                    await post.save();
                     await ActivityLog.create({
                         user: post.user,
                         actionType: "POST_PUBLISHED",

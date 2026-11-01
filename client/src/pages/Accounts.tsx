@@ -98,7 +98,7 @@ const Accounts = () => {
                 {showPlatformPicker && <PlatformPickerModel connectedIds={connectedIds} connecting={connecting} onClose={()=> setShowPlatformPicker(false)} onConnect={handleConnect}/> }
 
                 {/* Connected accounts list */}
-                <AccountList accounts={accounts} onDisconnect={handleDisconnect} />
+                <AccountList accounts={accounts} onDisconnect={handleDisconnect} onOpenPicker={() => setShowPlatformPicker(true)} />
             </div>
         )
     }

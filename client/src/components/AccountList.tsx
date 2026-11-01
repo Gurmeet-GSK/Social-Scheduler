@@ -3,10 +3,11 @@ import { PLATFORMS } from "../assets/assets";
 
 interface AccountListProps {
     accounts: any[];
-    onDisconnect: (accountId: string) => Promise<void>
+    onDisconnect: (accountId: string) => Promise<void>;
+    onOpenPicker?: () => void;
 }
 
-const AccountList = ({ accounts, onDisconnect }: AccountListProps) => {
+const AccountList = ({ accounts, onDisconnect, onOpenPicker }: AccountListProps) => {
 
     const handleDisconnect = async (accountId: string) => {
         const confirm = window.confirm("Are you sure you want to disconnect this account?");
@@ -17,9 +18,14 @@ const AccountList = ({ accounts, onDisconnect }: AccountListProps) => {
     if (accounts.length === 0) {
         return (
             <div className="bg-white rounded-2xl border-2 border-dashed border-state-200 flex flex-col items-center justify-center py-20 px-6">
-                <div className="size-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                    <PlusIcon className="size-6 text-slate-500 opacity-50" />
-                </div>
+                <button
+                    type="button"
+                    onClick={onOpenPicker}
+                    className="size-14 bg-slate-50 hover:bg-slate-100 active:scale-95 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 transition-all cursor-pointer group"
+                    title="Connect account"
+                >
+                    <PlusIcon className="size-6 text-slate-500 opacity-50 group-hover:opacity-80 transition-opacity" />
+                </button>
                 <p className="text-slate-700 text-lg">No accounts connected</p>
                 <p className="text-sm text-slate-400 mt-1 max-w-xs text-center">Connect your first social platform to start scheduling and automating your content.</p>
             </div>  
@@ -54,7 +60,7 @@ const AccountList = ({ accounts, onDisconnect }: AccountListProps) => {
                                 </>
                             )}
                         </div>
-                        <button onClick={()=> handleDisconnect(account._id)} title="Disconnect accont" className="ml-2 p-1.5 rounded-lg text-slate-300 group-hover:text-red-500 transition-all">
+                        <button onClick={()=> handleDisconnect(account._id)} title="Disconnect account" className="ml-2 p-1.5 rounded-lg text-slate-300 group-hover:text-red-500 transition-all">
                             <UnplugIcon className="size-4"/>
                         </button>
                     </div>
